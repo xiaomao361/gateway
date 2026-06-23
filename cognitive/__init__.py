@@ -1,0 +1,1 @@
+"""ClaraCore cognitive orchestration."""

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "claracore": {
+      "type": "stdio",
+      "command": "/path/to/gateway/run_mcp.sh",
+      "args": [],
+      "env": {
+        "CLARACORE_AGENT_ID": "my-agent",
+        "CLARACORE_PYTHON": "/path/to/python3"
+      }
+    }
+  }
+}

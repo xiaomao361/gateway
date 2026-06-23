@@ -1,0 +1,63 @@
+version: 1
+
+cognitive:
+  compression:
+    enabled: false
+
+# Paths are expanded by runtime/supervisor.py.
+# CLARACORE_ROOT defaults to the parent directory containing gateway/,
+# CLARACORE_PYTHON defaults to python3, and HOME uses the current user.
+services:
+  memoria-web:
+    description: Memoria web interface
+    type: web
+    command:
+      - ${CLARACORE_PYTHON}
+      - ${CLARACORE_ROOT}/services/memoria/server/app.py
+      - --host
+      - 127.0.0.1
+      - --port
+      - "8011"
+    cwd: ${CLARACORE_ROOT}/services/memoria
+    port: 8011
+    health_url: http://127.0.0.1:8011/api/stats
+    web_url: http://127.0.0.1:8011/
+
+  continuity-web:
+    description: Continuity web interface
+    type: web
+    command:
+      - ${CLARACORE_PYTHON}
+      - ${CLARACORE_ROOT}/services/continuity/server/app.py
+      - --host
+      - 127.0.0.1
+      - --port
+      - "8012"
+    cwd: ${CLARACORE_ROOT}/services/continuity
+    port: 8012
+    health_url: http://127.0.0.1:8012/api/dashboard?agent_id=${CLARACORE_AGENT_ID}
+    web_url: http://127.0.0.1:8012/?agent_id=${CLARACORE_AGENT_ID}
+
+  innerlife-web:
+    description: InnerLife web interface
+    type: web
+    command:
+      - ${CLARACORE_PYTHON}
+      - ${CLARACORE_ROOT}/services/innerlife/server/app.py
+      - --host
+      - 127.0.0.1
+      - --port
+      - "8013"
+    cwd: ${CLARACORE_ROOT}/services/innerlife
+    port: 8013
+    health_url: http://127.0.0.1:8013/api/status
+    web_url: http://127.0.0.1:8013/
+
+  innerlife-daemon:
+    description: InnerLife background processing
+    type: daemon
+    command:
+      - ${CLARACORE_PYTHON}
+      - -m
+      - innerlife.daemon
+    cwd: ${CLARACORE_ROOT}/services/innerlife
