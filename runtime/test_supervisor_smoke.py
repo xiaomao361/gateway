@@ -56,7 +56,7 @@ def config(port: int) -> Path:
                         "description": "temporary test server",
                         "type": "web",
                         "command": [
-                            sys.executable,
+                            "${CLARACORE_PYTHON}",
                             "-m",
                             "http.server",
                             str(port),
@@ -79,8 +79,17 @@ def config(port: int) -> Path:
 
 def main() -> None:
     port = free_port()
-    supervisor = Supervisor(config(port), TMP / "managed-state")
+    env_path = TMP / "gateway.env"
+    env_path.write_text(
+        f"CLARACORE_PYTHON={sys.executable}\n",
+        encoding="utf-8",
+    )
+    supervisor = Supervisor(config(port), TMP / "managed-state", env_path)
     try:
+        check(
+            "读取私密 Python 配置",
+            supervisor.services["test-web"]["command"][0] == sys.executable,
+        )
         check("初始状态停止", supervisor.status("test-web")["state"] == "stopped")
         started = supervisor.start("test-web")
         check("服务已启动", started["state"] == "running")
@@ -112,7 +121,7 @@ def main() -> None:
         )
         try:
             external_supervisor = Supervisor(
-                config(external_port), TMP / "external-state"
+                config(external_port), TMP / "external-state", env_path
             )
             check(
                 "识别外部启动的服务",

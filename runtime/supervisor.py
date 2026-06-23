@@ -12,8 +12,28 @@ from pathlib import Path
 import yaml
 
 
+def _load_env_file(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    if not path.exists():
+        return values
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if key:
+            values[key] = value.strip().strip('"').strip("'")
+    return values
+
+
 class Supervisor:
-    def __init__(self, config_path: str | Path | None = None, state_dir: str | Path | None = None):
+    def __init__(
+        self,
+        config_path: str | Path | None = None,
+        state_dir: str | Path | None = None,
+        env_path: str | Path | None = None,
+    ):
         runtime_dir = Path(__file__).resolve().parent
         self.config_path = Path(config_path or runtime_dir / "services.yaml")
         self.state_dir = Path(state_dir or runtime_dir / "state")
@@ -27,12 +47,18 @@ class Supervisor:
             config.setdefault("services", {}).update(
                 local_config.get("services", {})
             )
+        private_env = _load_env_file(
+            Path(env_path)
+            if env_path
+            else Path.home() / ".claracore" / "gateway" / "gateway.env"
+        )
+        self.base_env = {**private_env, **os.environ}
         defaults = {
             "CLARACORE_ROOT": str(Path(__file__).resolve().parents[2]),
-            "CLARACORE_PYTHON": os.environ.get(
-                "CLARACORE_PYTHON", os.environ.get("PYTHON", "python3")
+            "CLARACORE_PYTHON": self.base_env.get(
+                "CLARACORE_PYTHON", self.base_env.get("PYTHON", "python3")
             ),
-            "CLARACORE_AGENT_ID": os.environ.get(
+            "CLARACORE_AGENT_ID": self.base_env.get(
                 "CLARACORE_AGENT_ID", "default"
             ),
             "HOME": str(Path.home()),
@@ -109,7 +135,10 @@ class Supervisor:
         if not url:
             return None
         try:
-            with urllib.request.urlopen(url, timeout=1.5) as response:
+            opener = urllib.request.build_opener(
+                urllib.request.ProxyHandler({})
+            )
+            with opener.open(url, timeout=1.5) as response:
                 return 200 <= response.status < 500
         except Exception:
             return False
@@ -207,7 +236,7 @@ class Supervisor:
         cwd = Path(service.get("cwd", self.config_path.parent)).expanduser()
         if not cwd.exists():
             raise ValueError(f"service cwd does not exist: {cwd}")
-        env = dict(os.environ)
+        env = dict(self.base_env)
         env.update({str(k): str(v) for k, v in (service.get("env") or {}).items()})
         log_path = self.logs_dir / f"{name}.log"
         log_file = log_path.open("a", encoding="utf-8")
