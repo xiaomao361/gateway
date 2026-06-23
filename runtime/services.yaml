@@ -8,6 +8,21 @@ cognitive:
 # CLARACORE_ROOT defaults to the parent directory containing gateway/,
 # CLARACORE_PYTHON defaults to python3, and HOME uses the current user.
 services:
+  gateway-web:
+    description: Gateway service management console
+    type: web
+    command:
+      - ${CLARACORE_PYTHON}
+      - ${CLARACORE_ROOT}/gateway/web/app.py
+      - --host
+      - 127.0.0.1
+      - --port
+      - "8010"
+    cwd: ${CLARACORE_ROOT}/gateway
+    port: 8010
+    health_url: http://127.0.0.1:8010/
+    web_url: http://127.0.0.1:8010/
+
   memoria-web:
     description: Memoria web interface
     type: web

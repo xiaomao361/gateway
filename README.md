@@ -89,6 +89,20 @@ The gateway adds tools for:
 Grafana runs as a short-lived MCP subprocess. A failed Grafana request is
 isolated from the other providers.
 
+## Web management console
+
+The local management page runs on `http://127.0.0.1:8010/`. It lists the
+merged public and local service registry and supports:
+
+- refresh and health inspection;
+- start, stop, and restart;
+- opening registered web interfaces;
+- viewing managed-process logs;
+- starting all stopped web services;
+- stopping only processes started by this supervisor.
+
+The console binds to localhost by default.
+
 ## Login services
 
 Background daemons are separate from the stdio MCP process. A generic macOS

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClaraCore Gateway</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">ClaraCore Gateway</div>
+      <div class="header-state" id="header-state">Checking services…</div>
+    </header>
+
+    <main>
+      <section class="page-heading">
+        <div>
+          <h1>Services</h1>
+          <p>Local applications and background processes registered with the gateway.</p>
+        </div>
+        <div class="toolbar">
+          <button class="button" data-bulk="refresh">Refresh</button>
+          <button class="button button-primary" data-bulk="start-web">Start all web</button>
+          <button class="button button-danger" data-bulk="stop-managed">Stop managed</button>
+        </div>
+      </section>
+
+      <section class="summary" id="summary" aria-label="Service summary"></section>
+
+      <section class="service-panel">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Port</th>
+                <th>State</th>
+                <th>Health</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="service-rows">
+              <tr><td colspan="7" class="empty">Loading services…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="log-panel" id="log-panel" hidden>
+        <div class="log-header">
+          <div>
+            <span class="log-label">Service logs</span>
+            <strong id="log-title"></strong>
+          </div>
+          <button class="icon-button" id="close-logs" aria-label="Close logs">×</button>
+        </div>
+        <pre id="log-output">No log lines.</pre>
+      </section>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
